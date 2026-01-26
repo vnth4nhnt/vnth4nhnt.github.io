@@ -1,48 +1,60 @@
 import { siteConfig } from "../config";
 import type I18nKey from "./i18nKey";
 import { en } from "./languages/en";
-import { es } from "./languages/es";
-import { id } from "./languages/id";
-import { ja } from "./languages/ja";
-import { ko } from "./languages/ko";
-import { th } from "./languages/th";
-import { tr } from "./languages/tr";
 import { vi } from "./languages/vi";
-import { zh_CN } from "./languages/zh_CN";
-import { zh_TW } from "./languages/zh_TW";
 
 export type Translation = {
 	[K in I18nKey]: string;
 };
 
-const defaultTranslation = en;
+import {
+	DEFAULT_LOCALE,
+	SUPPORTED_LOCALES,
+	type SupportedLocale,
+} from "./constants";
+
+export { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale };
 
 const map: { [key: string]: Translation } = {
-	es: es,
 	en: en,
-	en_us: en,
-	en_gb: en,
-	en_au: en,
-	zh_cn: zh_CN,
-	zh_tw: zh_TW,
-	ja: ja,
-	ja_jp: ja,
-	ko: ko,
-	ko_kr: ko,
-	th: th,
-	th_th: th,
-	vi: vi,
-	vi_vn: vi,
-	id: id,
-	tr: tr,
-	tr_tr: tr,
+	vi: vi
 };
+
+const defaultTranslation = map[DEFAULT_LOCALE.toLowerCase()];
 
 export function getTranslation(lang: string): Translation {
 	return map[lang.toLowerCase()] || defaultTranslation;
 }
 
-export function i18n(key: I18nKey): string {
-	const lang = siteConfig.lang || "en";
-	return getTranslation(lang)[key];
+export function i18n(key: I18nKey, lang?: string): string {
+	// If lang is explicitly provided, use it (e.g., for language switcher buttons)
+	if (lang) {
+		return getTranslation(lang)[key];
+	}
+	
+	let locale = siteConfig.lang || DEFAULT_LOCALE;
+	
+	// In browser, try to detect locale from localStorage or URL
+	if (typeof window !== 'undefined') {
+		// Check localStorage first
+		const storedLang = localStorage.getItem('preferred-language');
+		if (storedLang && SUPPORTED_LOCALES.includes(storedLang as any)) {
+			locale = storedLang;
+		} else {
+			// Fallback to URL detection
+			const pathParts = window.location.pathname.split('/');
+			if (pathParts[1] && SUPPORTED_LOCALES.includes(pathParts[1] as any)) {
+				locale = pathParts[1];
+			}
+		}
+	}
+	
+	return getTranslation(locale)[key];
+}
+
+export function getKeyToLanguage(lang: string): string {
+	const normalized = lang.replace("_", "-").toLowerCase();
+	const [language, region] = normalized.split("-");
+	if (!region) return language;
+	return `${language}-${region.toUpperCase()}`;
 }
