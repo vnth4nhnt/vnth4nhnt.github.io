@@ -97,10 +97,10 @@ export async function getPostForLang(
 export async function getSortedPostsForLang(lang: string) {
 	const allPosts = await getRawSortedPosts();
 	
-	// For English, only show English posts (no fallbacks)
+	// The default locale only shows posts authored in that locale.
 	if (lang === DEFAULT_LOCALE) {
-		const englishOnlyPosts = allPosts.filter((post) => getPostLang(post) === lang);
-		return englishOnlyPosts.sort((a, b) => {
+		const defaultLocalePosts = allPosts.filter((post) => getPostLang(post) === lang);
+		return defaultLocalePosts.sort((a, b) => {
 			const dateA = new Date(a.data.published);
 			const dateB = new Date(b.data.published);
 			return dateA > dateB ? -1 : 1;
@@ -335,5 +335,4 @@ export async function getPostByUrl(
 			`${post.slug}/` === slugMatch,
 	);
 }
-
 

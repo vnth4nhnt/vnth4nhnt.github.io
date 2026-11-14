@@ -445,6 +445,7 @@ const setup = () => {
             if (toc) {
                 toc.classList.remove('toc-not-ready')
             }
+			scrollFunction()
         }, 200)
 	});
 }
@@ -457,11 +458,16 @@ if (window?.swup?.hooks) {
 let backToTopBtn = document.getElementById('back-to-top-btn');
 let toc = document.getElementById('toc-wrapper');
 let navbar = document.getElementById('navbar-wrapper')
+const getScrollTop = () => document.documentElement.scrollTop || document.body.scrollTop;
 function scrollFunction() {
 	let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100)
+	backToTopBtn = document.getElementById('back-to-top-btn');
+	toc = document.getElementById('toc-wrapper');
+	navbar = document.getElementById('navbar-wrapper');
+	const scrollTop = getScrollTop();
 
 	if (backToTopBtn) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
+		if (scrollTop > bannerHeight) {
 			backToTopBtn.classList.remove('hide')
 		} else {
 			backToTopBtn.classList.add('hide')
@@ -469,7 +475,7 @@ function scrollFunction() {
 	}
 
 	if (bannerEnabled && toc) {
-		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
+		if (scrollTop > bannerHeight) {
 			toc.classList.remove('toc-hide')
 		} else {
 			toc.classList.add('toc-hide')
@@ -486,7 +492,7 @@ function scrollFunction() {
 			bannerHeight = BANNER_HEIGHT_HOME
 		}
 		let threshold = window.innerHeight * (bannerHeight / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
-		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
+		if (scrollTop >= threshold) {
 			navbar.classList.add('navbar-hidden')
 		} else {
 			navbar.classList.remove('navbar-hidden')
@@ -494,12 +500,15 @@ function scrollFunction() {
 	}
 }
 window.onscroll = scrollFunction
+window.addEventListener('load', scrollFunction, { once: true });
+scrollFunction()
 
 window.onresize = () => {
 	// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
 	let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
 	offset = offset - offset % 4;
 	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+	scrollFunction();
 }
 
 </script>
